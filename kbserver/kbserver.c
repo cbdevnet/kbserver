@@ -25,6 +25,7 @@
 #include "evfd.c"
 #include "sighandle.c"
 #include "sockfd.c"
+#include "led.c"
 
 int usage(char* fn){
 	printf("garfield-pos kbserver utility\n\n");	
