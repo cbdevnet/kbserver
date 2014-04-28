@@ -7,6 +7,8 @@
 #include "kbactiond.h"
 
 #include "argparse.c"
+#include "cfgparse.c"
+#include "config.c"
 
 int usage(char* fn){
 	printf("kbactiond v%s\n",_VERSION);
