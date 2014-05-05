@@ -3,6 +3,8 @@
 #include <string.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include <errno.h>
+#include <ctype.h>
 
 #include "kbactiond.h"
 
@@ -29,16 +31,18 @@ int main(int argc, char** argv){
 	
 	//parse config file
 	if(!cfg_read(&args, &cfg)){
-		printf("Failed to read configuration file\n");
+		fprintf(stderr, "Failed to read configuration file\n");
 		exit(1);
 	}
 
 	//check config sanity
 	if(!cfg_sane(&args, &cfg)){
-		printf("Configuration failed the sanity test\n");
+		fprintf(stderr, "Configuration failed the sanity test\n");
 		exit(1);
 	}
 
 	//open connections
 	//begin execution
+	//
+	return 0;
 }

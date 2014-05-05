@@ -1,24 +1,97 @@
+char* string_trim_lead(char* in){
+	unsigned i;
+	for(i=0;isspace(in[i]);i++){
+	}
+	return in+i;
+}
+
+CFG_LINE_STATUS cfg_handle_line(char* line, ARGUMENTS* args, CONFIG* cfg){
+	//skip comments & blank lines
+	if(line[0]=='#'||line[0]==0){
+		return LINE_OK;
+	}
+
+	if(!strncmp(line, "token", 5)){
+		//handle token stanza
+		line=string_trim_lead(line+5);
+		printf("Token: %s\n", line);
+	}
+	else if(!strncmp(line, "connect", 7)){
+		//handle connect line
+		line=string_trim_lead(line+7);
+		printf("Connect: %s\n", line);
+	}
+	else if(!strncmp(line, "listen", 6)){
+		//handle listen line
+		line=string_trim_lead(line+6);
+		printf("Listen: %s\n", line);
+	}
+	else{
+		fprintf(stderr, "Unknown token: %s\n", line);
+		return LINE_FAIL;
+	}
+}
+
 bool cfg_read(ARGUMENTS* args, CONFIG* cfg){
-	FILE* cfg;
+	FILE* cfg_handle;
+	//FIXME null contents
+	char cfg_line[MAX_CFGLINE_LENGTH+1];
+	int err, line_count=0, offset;
+	CFG_LINE_STATUS line_status;
 
 	if(!args->cfgfile){
-		if(args->verbosity>0){
-			printf("No config file supplied, aborting\n");
-		}
+		fprintf(stderr, "No config file supplied, aborting\n");
 		return false;
 	}
 
-	cfg=fopen(args->cfgfile, "r");
-	if(!cfg){
-		if(args->verbosity>0){
-			perror("read_config");
-		}
+	cfg_handle=fopen(args->cfgfile, "r");
+	if(!cfg_handle){
+		perror("read_config");
 		return false;
 	}
 
-	//TODO read config file
+	while(fgets(cfg_line, MAX_CFGLINE_LENGTH, cfg_handle)!=NULL){
+		line_count++;
+		
+		//skip trailing newline and spaces
+		for(offset=strlen(cfg_line)-1;offset>=0;offset--){
+			if(isspace(cfg_line[offset])){
+				cfg_line[offset]=0;
+			}
+			else{
+				break;
+			}
+		}
 
-	fclose(cfg);
+		//skip leading spaces
+		for(offset=0;isspace(cfg_line[offset]);offset++){
+		}
 
-	return false;
+		line_status=cfg_handle_line(cfg_line+offset, args, cfg);
+
+		switch(line_status){
+			case LINE_OK:
+				break;
+
+			case LINE_WARN:
+				fprintf(stderr, "Warning emitted on configuration file line %d\n", line_count);
+				break;
+
+			case LINE_FAIL:
+				fprintf(stderr, "Failed to parse configuration file line %d, aborting\n", line_count);
+				fclose(cfg_handle);
+				return false;
+		}
+	}
+
+	err=0;
+
+	if(errno!=0){
+		perror("cfg_read");
+		err=-1;
+	}
+
+	fclose(cfg_handle);
+
+	return err==0;
 }

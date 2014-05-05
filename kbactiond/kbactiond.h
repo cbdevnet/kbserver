@@ -2,6 +2,7 @@
 #define COMMAND_BUFFER_LENGTH 512
 #define MAX_TOKEN_LENGTH 128
 #define MAX_PART_LENGTH 64
+#define MAX_CFGLINE_LENGTH (MAX_TOKEN_LENGTH+MAX_PART_LENGTH+128)
 
 typedef struct /*_ARGUMENTS*/ {
 	unsigned verbosity;
@@ -28,6 +29,12 @@ typedef struct /*_CONN*/ {
 	CONN_TYPE type;
 	int fd;
 } CONNECTION;
+
+typedef enum /*_CFG_LINE_STATUS*/ {
+	LINE_OK,
+	LINE_WARN,
+	LINE_FAIL
+} CFG_LINE_STATUS;
 
 typedef struct /*_DATA_CONN*/ {
 	CONNECTION conn;

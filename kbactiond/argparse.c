@@ -10,16 +10,18 @@ bool args_parse(ARGUMENTS* args, int argc, char** argv){
 					}
 					break;
 				case 'f':
-					if(i<argc+1){
+					if(i>=argc-1){
+						fprintf(stderr, "Missing config file name\n");
 						return false;
 					}
-					args->cfgfile=argv[i+1];
+					args->cfgfile=argv[++i];
 					break;
 				default:
 					return false;
 			}
 		}
 		else{
+			fprintf(stderr, "Stray argument %s\n", argv[i]);
 			return false;
 		}
 	}
