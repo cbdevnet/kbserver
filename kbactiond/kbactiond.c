@@ -8,6 +8,7 @@
 
 #include "kbactiond.h"
 
+#include "token.c"
 #include "argparse.c"
 #include "cfgparse.c"
 #include "config.c"

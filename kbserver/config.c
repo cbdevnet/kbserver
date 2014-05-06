@@ -71,7 +71,7 @@ char* cfg_parse_string(char* input){
 			if(input[0]!=0&&input[0]!='\''){
 				//try strtoul
 				conv=(uint8_t)strtoul(input, &endptr, 0);
-				if(input==endptr&&input[0]!=0){
+				if(conv==0||input==endptr){
 					free(translation);
 					fprintf(stderr, "Invalid numeral at %s\n",input);
 					return NULL;
