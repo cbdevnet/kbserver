@@ -73,12 +73,11 @@ int string_parse_expression(const char* in, char** out, const char parse_delim, 
 }
 
 CFG_LINE_STATUS cfg_handle_line(char* line, ARGUMENTS* args, CONFIG* cfg){
-	unsigned off;
 	char* token_name;
 	char* token_command;
 	TOKEN_TYPE token_type;
 	CFG_LINE_STATUS rv=LINE_OK;
-
+	CONN_SPEC new_conn;
 
 	//skip comments & blank lines
 	if(line[0]=='#'||line[0]==0){
@@ -102,6 +101,7 @@ CFG_LINE_STATUS cfg_handle_line(char* line, ARGUMENTS* args, CONFIG* cfg){
 			token_type=token_type_from_string(line);
 		
 		printf("Token: \"%s\" Command: \"%s\" Type %s\n", token_name, token_command, dbg_token_type(token_type));
+		//TODO add token to mapping
 
 		free(token_name);
 		if(token_command){
@@ -112,14 +112,30 @@ CFG_LINE_STATUS cfg_handle_line(char* line, ARGUMENTS* args, CONFIG* cfg){
 	else if(!strncmp(line, "connect", 7)){
 		//handle connect stanza
 		line=string_trim_lead(line+7);
-		printf("Connect: %s\n", line);
-		return LINE_OK;
+		if(!cfg_parse_connspec(&new_conn, line)){
+			fprintf(stderr, "Failed to parse connection specification: %s\n", line);
+			rv=LINE_FAIL;
+		}
+		else{
+			if(!cfg_store_data_connspec(cfg, &new_conn)){
+				rv=LINE_FAIL;
+			}
+		}
+		return rv;
 	}
 	else if(!strncmp(line, "listen", 6)){
 		//handle listen stanza
 		line=string_trim_lead(line+6);
-		printf("Listen: %s\n", line);
-		return LINE_OK;
+		if(!cfg_parse_connspec(&new_conn, line)){
+			fprintf(stderr, "Failed to parse connection specification: %s\n", line);
+			rv=LINE_FAIL;
+		}
+		else{
+			if(!cfg_store_listen_connspec(cfg, &new_conn)){
+				rv=LINE_FAIL;
+			}
+		}
+		return rv;
 	}
 
 	fprintf(stderr, "Unknown token: %s\n", line);

@@ -9,9 +9,9 @@
 #include "kbactiond.h"
 
 #include "token.c"
+#include "config.c"
 #include "argparse.c"
 #include "cfgparse.c"
-#include "config.c"
 
 int usage(char* fn){
 	printf("kbactiond v%s\n",_VERSION);

@@ -25,7 +25,13 @@ typedef enum /*_TTYPE*/ {
 	T_EXEC
 } TOKEN_TYPE;
 
-typedef struct /*_CONN*/ {
+typedef struct /*_CONNSPEC*/ {
+	char* hostname;
+	uint16_t port;
+} CONN_SPEC;
+
+typedef struct /*_CONN*/{
+	CONN_SPEC spec;
 	CONN_TYPE type;
 	int fd;
 } CONNECTION;
@@ -48,7 +54,7 @@ typedef struct /*_TOKEN*/ {
 } TOKEN;
 
 typedef struct /*_CONFIG*/ {
-	CONNECTION* listen_socks;
-	DATA_CONNECTION* inputs;
-	TOKEN* tokens;
+	CONNECTION** listen_socks;
+	DATA_CONNECTION** inputs;
+	TOKEN** tokens;
 } CONFIG;
