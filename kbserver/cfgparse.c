@@ -49,12 +49,12 @@ int parse_config(char* input_file, CONFIG_PARAMS* cfg){
 
 		if(!strncmp(line_buffer+offset, "device", 6)){
 			//handle device line
-			cfg->input_device=calloc(1, (strlen(line_buffer+param)+1)*sizeof(char));
+			cfg->input_device=calloc(strlen(line_buffer+param)+1, sizeof(char));
 			strncpy(cfg->input_device, line_buffer+param, strlen(line_buffer+param));
 		}
 		else if(!strncmp(line_buffer+offset, "bind", 4)){
 			//handle bind line
-			cfg->bind_host=calloc(1, (strlen(line_buffer+param)+1)*sizeof(char));
+			cfg->bind_host=calloc(strlen(line_buffer+param)+1, sizeof(char));
 			strncpy(cfg->bind_host, line_buffer+param, strlen(line_buffer+param));
 		}
 		else if(!strncmp(line_buffer+offset, "port", 4)){

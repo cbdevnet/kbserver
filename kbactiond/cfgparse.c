@@ -5,7 +5,15 @@ char* string_trim_lead(char* in){
 	return in+i;
 }
 
+char* string_parse_expression(char* in){
+	char* translation=calloc(strlen(input), sizeof(char));
+i	unsigned pos;
+
+}
+
 CFG_LINE_STATUS cfg_handle_line(char* line, ARGUMENTS* args, CONFIG* cfg){
+	TOKEN new_token;
+
 	//skip comments & blank lines
 	if(line[0]=='#'||line[0]==0){
 		return LINE_OK;
@@ -15,14 +23,18 @@ CFG_LINE_STATUS cfg_handle_line(char* line, ARGUMENTS* args, CONFIG* cfg){
 		//handle token stanza
 		line=string_trim_lead(line+5);
 		printf("Token: %s\n", line);
+		//read stanza parts (NAME, COMMAND, TYPE)
+			//find first separator, replace by 0, parse
+			//find second separator, replace by 0, parse
+			//parse from last separator
 	}
 	else if(!strncmp(line, "connect", 7)){
-		//handle connect line
+		//handle connect stanza
 		line=string_trim_lead(line+7);
 		printf("Connect: %s\n", line);
 	}
 	else if(!strncmp(line, "listen", 6)){
-		//handle listen line
+		//handle listen stanza
 		line=string_trim_lead(line+6);
 		printf("Listen: %s\n", line);
 	}

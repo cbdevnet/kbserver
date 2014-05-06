@@ -46,7 +46,7 @@ char* cfg_parse_string(char* input){
 	int pos=0;
 	uint8_t conv;
 	char* endptr;
-	char* translation=calloc(1, strlen(input)*sizeof(char));
+	char* translation=calloc(strlen(input), sizeof(char));
 	
 	if(!translation){
 		perror("cfg_parse_string");
