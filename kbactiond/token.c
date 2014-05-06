@@ -1,3 +1,8 @@
+bool token_add_mapping(CONFIG* cfg, char* name, char* action, TOKEN_TYPE type){
+	//TODO
+	return false;
+}
+
 TOKEN_TYPE token_type_from_string(char* in){
 	if(!strncmp(in, "START", 5)){
 		return T_START;

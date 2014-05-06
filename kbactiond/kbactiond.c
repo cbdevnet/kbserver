@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #include "kbactiond.h"
 
@@ -45,5 +46,7 @@ int main(int argc, char** argv){
 	//open connections
 	//begin execution
 	//
+	
+	cfg_free(&cfg);
 	return 0;
 }

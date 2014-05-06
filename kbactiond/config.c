@@ -73,5 +73,41 @@ bool cfg_store_listen_connspec(CONFIG* cfg, CONN_SPEC* conn){
 }
 
 bool cfg_sane(ARGUMENTS* argc, CONFIG* cfg){
+	//TODO
+	return false;
+}
+
+bool cfg_free(CONFIG* cfg){
+	unsigned i;
+	//free listen connection data
+	if(cfg->listen_socks){
+		for(i=0;cfg->listen_socks[i];i++){
+			if(cfg->listen_socks[i]->fd>0){
+				//FIXME use cross-platform calls here
+				close(cfg->listen_socks[i]->fd);
+				cfg->listen_socks[i]->fd=-1;
+			}
+			free(cfg->listen_socks[i]->spec.hostname);
+			free(cfg->listen_socks[i]);
+		}
+		free(cfg->listen_socks);
+	}
+
+	//free client connection data
+	if(cfg->inputs){
+		for(i=0;cfg->inputs[i];i++){
+			if(cfg->inputs[i]->conn.fd>0){
+				//FIXME use cross-platform calls here
+				close(cfg->inputs[i]->conn.fd);
+				cfg->inputs[i]->conn.fd=-1;
+			}
+			free(cfg->inputs[i]->conn.spec.hostname);
+			free(cfg->inputs[i]);
+		}
+		free(cfg->inputs);
+	}
+
+	//TODO free token storage
+
 	return false;
 }
