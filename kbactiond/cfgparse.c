@@ -100,8 +100,9 @@ CFG_LINE_STATUS cfg_handle_line(char* line, ARGUMENTS* args, CONFIG* cfg){
 			//parse from last separator (type)
 			token_type=token_type_from_string(line);
 		
-		printf("Token: \"%s\" Command: \"%s\" Type %s\n", token_name, token_command, dbg_token_type(token_type));
-		//TODO add token to mapping
+		if(!token_add_mapping(cfg, token_name, token_command, token_type)){
+			rv=LINE_WARN;
+		}
 
 		free(token_name);
 		if(token_command){

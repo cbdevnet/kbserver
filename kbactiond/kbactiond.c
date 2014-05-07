@@ -34,12 +34,14 @@ int main(int argc, char** argv){
 	//parse config file
 	if(!cfg_read(&args, &cfg)){
 		fprintf(stderr, "Failed to read configuration file\n");
+		cfg_free(&cfg);
 		exit(1);
 	}
 
 	//check config sanity
 	if(!cfg_sane(&args, &cfg)){
 		fprintf(stderr, "Configuration failed the sanity test\n");
+		cfg_free(&cfg);
 		exit(1);
 	}
 

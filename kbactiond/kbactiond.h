@@ -44,13 +44,13 @@ typedef enum /*_CFG_LINE_STATUS*/ {
 
 typedef struct /*_DATA_CONN*/ {
 	CONNECTION conn;
-	char cmd_buf[COMMAND_BUFFER_LENGTH];
+	char cmd_buf[COMMAND_BUFFER_LENGTH+1];
 } DATA_CONNECTION;
 
 typedef struct /*_TOKEN*/ {
 	TOKEN_TYPE type;
-	char token[MAX_TOKEN_LENGTH];
-	char command[MAX_PART_LENGTH];
+	char token[MAX_TOKEN_LENGTH+1];
+	char command[MAX_PART_LENGTH+1];
 } TOKEN;
 
 typedef struct /*_CONFIG*/ {

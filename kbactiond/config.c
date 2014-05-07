@@ -35,7 +35,6 @@ bool cfg_store_data_connspec(CONFIG* cfg, CONN_SPEC* conn){
 		for(num=0;cfg->inputs[num];num++){
 		}
 		cfg->inputs=realloc(cfg->inputs, (num+2)*sizeof(DATA_CONNECTION*));
-		num++;
 		cfg->inputs[num+1]=NULL;
 	}
 	
@@ -61,7 +60,6 @@ bool cfg_store_listen_connspec(CONFIG* cfg, CONN_SPEC* conn){
 		for(num=0;cfg->listen_socks[num];num++){
 		}
 		cfg->listen_socks=realloc(cfg->listen_socks, (num+2)*sizeof(CONNECTION*));
-		num++;
 		cfg->listen_socks[num+1]=NULL;
 	}
 	
@@ -107,7 +105,5 @@ bool cfg_free(CONFIG* cfg){
 		free(cfg->inputs);
 	}
 
-	//TODO free token storage
-
-	return false;
+	return token_free(cfg);
 }
