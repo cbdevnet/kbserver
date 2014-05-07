@@ -47,7 +47,7 @@ int main(int argc, char** argv){
 
 	//open connections
 	//begin execution
-	//
+	//close connections
 	
 	cfg_free(&cfg);
 	return 0;

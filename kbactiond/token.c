@@ -55,8 +55,6 @@ bool token_add_mapping(CONFIG* cfg, char* name, char* action, TOKEN_TYPE type){
 		strncpy(cfg->tokens[insert_pos]->command, action, MAX_PART_LENGTH);
 	}
 
-	printf("Inserted token %s (%s) at slot %d\n", cfg->tokens[insert_pos]->token, dbg_token_type(cfg->tokens[insert_pos]->type), insert_pos);
-	
 	return true;
 }
 

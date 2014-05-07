@@ -4,7 +4,7 @@ bool cfg_parse_connspec(CONN_SPEC* spec, char* input){
 	for(off=0;!isspace(input[off]);off++){
 	}
 
-	if(input[off]==0){
+	if(input[off]==0||off==0){
 		return false;
 	}
 
@@ -16,6 +16,10 @@ bool cfg_parse_connspec(CONN_SPEC* spec, char* input){
 	strncpy(spec->hostname, input, off);
 
 	spec->port=(uint16_t)strtoul(input+off, NULL, 10);
+
+	if(spec->port==0){
+		return false;
+	}
 
 	return true;
 }
@@ -41,7 +45,6 @@ bool cfg_store_data_connspec(CONFIG* cfg, CONN_SPEC* conn){
 	cfg->inputs[num]=malloc(sizeof(DATA_CONNECTION));
 	cfg->inputs[num]->conn.spec=new_conn;
 
-	printf("Stored outgoing connection to %s, Port %d in slot %d\n", cfg->inputs[num]->conn.spec.hostname, cfg->inputs[num]->conn.spec.port, num);
 	return true;
 }
 
@@ -66,13 +69,47 @@ bool cfg_store_listen_connspec(CONFIG* cfg, CONN_SPEC* conn){
 	cfg->listen_socks[num]=malloc(sizeof(CONNECTION));
 	cfg->listen_socks[num]->spec=new_conn;
 
-	printf("Stored listen socket on %s, Port %d in slot %d\n", cfg->listen_socks[num]->spec.hostname, cfg->listen_socks[num]->spec.port, num);
 	return true;
 }
 
-bool cfg_sane(ARGUMENTS* argc, CONFIG* cfg){
-	//TODO
-	return false;
+bool cfg_sane(ARGUMENTS* args, CONFIG* cfg){
+	//at least one exec or do
+	//FIXME prefix-freeness
+	unsigned listen_socks=0, client_socks=0, tokens=0;
+
+	if(cfg->listen_socks){
+		for(;cfg->listen_socks[listen_socks];listen_socks++){
+		}
+	}
+	
+	if(cfg->inputs){
+		for(;cfg->inputs[client_socks];client_socks++){
+		}
+	}
+
+	if(cfg->tokens){
+		for(;cfg->tokens[tokens];tokens++){
+		}
+	}
+
+	if(listen_socks+client_socks<1){
+		fprintf(stderr, "No connections defined\n");
+		return false;
+	}
+
+	if(tokens<1){
+		fprintf(stderr, "No tokens defined\n");
+		return false;
+	}
+
+	if(args->verbosity>0){
+		fprintf(stderr, "Configuration details:\n");
+		fprintf(stderr, "\t%d outgoing connections\n", client_socks);
+		fprintf(stderr, "\t%d listening sockets\n", listen_socks);
+		fprintf(stderr, "\t%d defined tokens\n", tokens);
+	}
+
+	return true;
 }
 
 bool cfg_free(CONFIG* cfg){
