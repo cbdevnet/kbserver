@@ -57,4 +57,5 @@ typedef struct /*_CONFIG*/ {
 	CONNECTION** listen_socks;
 	DATA_CONNECTION** inputs;
 	TOKEN** tokens;
+	unsigned conn_timeout;
 } CONFIG;

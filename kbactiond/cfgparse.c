@@ -138,6 +138,18 @@ CFG_LINE_STATUS cfg_handle_line(char* line, ARGUMENTS* args, CONFIG* cfg){
 		}
 		return rv;
 	}
+	else if(!strncmp(line, "timeout", 7)){
+		//handle timeout stanza
+		line=string_trim_lead(line+7);
+		
+		if(*line==0){
+			fprintf(stderr, "Read timeout stanza without argument.\n");
+			return LINE_FAIL;
+		}
+
+		cfg->conn_timeout=strtoul(line, NULL, 10);
+		return LINE_OK;
+	}
 
 	fprintf(stderr, "Unknown token: %s\n", line);
 	return LINE_FAIL;

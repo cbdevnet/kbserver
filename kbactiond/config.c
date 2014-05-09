@@ -107,6 +107,7 @@ bool cfg_sane(ARGUMENTS* args, CONFIG* cfg){
 		fprintf(stderr, "\t%d outgoing connections\n", client_socks);
 		fprintf(stderr, "\t%d listening sockets\n", listen_socks);
 		fprintf(stderr, "\t%d defined tokens\n", tokens);
+		fprintf(stderr, "\tConnection timeout %d seconds\n", cfg->conn_timeout);
 	}
 
 	return true;
