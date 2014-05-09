@@ -44,6 +44,7 @@ bool cfg_store_data_connspec(CONFIG* cfg, CONN_SPEC* conn){
 	
 	cfg->inputs[num]=malloc(sizeof(DATA_CONNECTION));
 	cfg->inputs[num]->conn.spec=new_conn;
+	cfg->inputs[num]->conn.type=CONN_OUTGOING;
 
 	return true;
 }
@@ -68,6 +69,7 @@ bool cfg_store_listen_connspec(CONFIG* cfg, CONN_SPEC* conn){
 	
 	cfg->listen_socks[num]=malloc(sizeof(CONNECTION));
 	cfg->listen_socks[num]->spec=new_conn;
+	cfg->listen_socks[num]->type=CONN_LISTEN;
 
 	return true;
 }
