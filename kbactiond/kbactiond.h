@@ -3,6 +3,7 @@
 #define MAX_TOKEN_LENGTH 128
 #define MAX_PART_LENGTH 64
 #define MAX_CFGLINE_LENGTH (MAX_TOKEN_LENGTH+MAX_PART_LENGTH+128)
+#define LISTEN_QUEUE_LENGTH 64
 
 typedef struct /*_ARGUMENTS*/ {
 	unsigned verbosity;

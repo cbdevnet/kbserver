@@ -6,11 +6,15 @@
 #include <errno.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 
 #include "kbactiond.h"
 
 #include "token.c"
 #include "config.c"
+#include "sockfd.c"
 #include "argparse.c"
 #include "cfgparse.c"
 
@@ -46,9 +50,16 @@ int main(int argc, char** argv){
 	}
 
 	//open connections
+	if(!conn_init(&args, &cfg)){
+		fprintf(stderr, "Failed to initialize network connections\n");
+		conn_close(&cfg);
+		cfg_free(&cfg);
+		exit(1);
+	}
+
 	//begin execution
-	//close connections
 	
+	conn_close(&cfg);
 	cfg_free(&cfg);
 	return 0;
 }
