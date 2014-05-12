@@ -17,6 +17,9 @@
 #include "sockfd.c"
 #include "argparse.c"
 #include "cfgparse.c"
+#include "sighandle.c"
+
+bool stop_processing=false;
 
 int usage(char* fn){
 	printf("kbactiond v%s\n",_VERSION);
@@ -57,8 +60,28 @@ int main(int argc, char** argv){
 		exit(1);
 	}
 
+	//set up signal handlers
+	signal(SIGPIPE, SIG_IGN);
+	signal(SIGINT, sig_interrupt);
+
 	//begin execution
-	
+	while(!stop_processing){
+	//add all fds to read set
+	//select over set
+	//iterate over results
+		//listen socket -> accept client
+		//use or create CONN_INCOMING entry
+
+		//data socket -> read data
+		//if closed, mark data inactive
+		//if timeout -> clear buffer
+		//match data to token
+		//resolve token to command/action
+		//if necessary, execute
+		//update last action timestamp
+	}
+
+	//clean up
 	conn_close(&cfg);
 	cfg_free(&cfg);
 	return 0;
