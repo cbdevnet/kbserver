@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <errno.h>
 #include <ctype.h>
+#include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -18,6 +19,7 @@
 #include "argparse.c"
 #include "cfgparse.c"
 #include "sighandle.c"
+#include "logic.c"
 
 bool stop_processing=false;
 
@@ -29,6 +31,7 @@ int usage(char* fn){
 int main(int argc, char** argv){
 	ARGUMENTS args;
 	CONFIG cfg;
+	int status;
 	
 	memset(&args, 0, sizeof(args));
 	memset(&cfg, 0, sizeof(cfg));
@@ -66,19 +69,31 @@ int main(int argc, char** argv){
 
 	//begin execution
 	while(!stop_processing){
-	//add all fds to read set
-	//select over set
-	//iterate over results
-		//listen socket -> accept client
-		//use or create CONN_INCOMING entry
+		status=conn_process_blocking(&args, &cfg);
+		//add all fds to read set
+		//select over set
+		//iterate over results
+			//listen socket -> accept client
+			//use or create CONN_INCOMING entry
 
-		//data socket -> read data
-		//if closed, mark data inactive
-		//if timeout -> clear buffer
-		//match data to token
-		//resolve token to command/action
-		//if necessary, execute
-		//update last action timestamp
+			//data socket -> read data
+			//if closed, mark data inactive
+
+		if(status<0){
+			//TODO errhandling
+		}
+
+		status=logic_process_incoming(&args, &cfg);
+		//iterate over active date connections
+			//if timeout -> clear buffer
+			//match data to token
+			//resolve token to command/action
+			//if necessary, execute
+			//update last action timestamp
+
+		if(status<0){
+			//TODO errhandling
+		}
 	}
 
 	//clean up

@@ -1,3 +1,8 @@
+int conn_process_blocking(ARGUMENTS* args, CONFIG* cfg){
+	//TODO
+	return -1;
+}
+
 bool conn_open(CONNECTION* conn){
 	int status;
 	char port[10];
