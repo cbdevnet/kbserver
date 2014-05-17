@@ -8,8 +8,16 @@ int conn_handle_read(ARGUMENTS* args, CONFIG* cfg, unsigned connection){
 		close(cfg->inputs[connection]->conn.fd);
 		cfg->inputs[connection]->conn.fd=-1;
 		cfg->inputs[connection]->active=false;
+
+		if(args->verbosity>2){
+			fprintf(stderr, "Disconnected client %d\n", connection);
+		}
 		return 0;
 	}
+
+	cfg->inputs[connection]->data_offset=bytes;
+
+	//TODO if buffer full, discard
 
 	//DEBUG
 	fprintf(stderr, "TEMP: Discarded %d bytes of input from connection %d\n", bytes, connection);
@@ -46,6 +54,7 @@ int conn_handle_new(ARGUMENTS* args, CONFIG* cfg, unsigned connection){
 				return -2;
 			}
 			cfg->inputs[pos]->conn.type=CONN_INCOMING;
+			cfg->inputs[pos]->conn.spec.hostname=NULL;
 			if(args->verbosity>2){
 				fprintf(stderr, "Accepting new client into created slot %d\n", pos);
 			}
@@ -66,7 +75,8 @@ int conn_handle_new(ARGUMENTS* args, CONFIG* cfg, unsigned connection){
 			return -2;
 		}
 		cfg->inputs[pos]->conn.type=CONN_INCOMING;
-			if(args->verbosity>2){
+		cfg->inputs[pos]->conn.spec.hostname=NULL;
+		if(args->verbosity>2){
 			fprintf(stderr, "Accepting new client into inital slot %d\n", pos);
 		}
 	}

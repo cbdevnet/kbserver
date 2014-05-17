@@ -12,6 +12,7 @@
 #include <netdb.h>
 
 #include "kbactiond.h"
+bool stop_processing=false;
 
 #include "token.c"
 #include "config.c"
@@ -20,8 +21,6 @@
 #include "cfgparse.c"
 #include "sighandle.c"
 #include "logic.c"
-
-bool stop_processing=false;
 
 int usage(char* fn){
 	printf("kbactiond v%s\n",_VERSION);

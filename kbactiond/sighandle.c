@@ -1,6 +1,6 @@
 void sig_interrupt(int param){
 	//handle interrupt gracefully
-	//TODO
+	stop_processing=true;
 	
 	printf("Should shut down gracefully now...\n");
 }
