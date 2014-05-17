@@ -4,6 +4,7 @@
 #define MAX_PART_LENGTH 64
 #define MAX_CFGLINE_LENGTH (MAX_TOKEN_LENGTH+MAX_PART_LENGTH+128)
 #define LISTEN_QUEUE_LENGTH 64
+#define SELECT_TIMEOUT 20
 
 typedef struct /*_ARGUMENTS*/ {
 	unsigned verbosity;
@@ -46,6 +47,10 @@ typedef enum /*_CFG_LINE_STATUS*/ {
 typedef struct /*_DATA_CONN*/ {
 	CONNECTION conn;
 	char cmd_buf[COMMAND_BUFFER_LENGTH+1];
+	char data_buf[MAX_TOKEN_LENGTH+1];
+	unsigned data_offset;
+	int last_event;
+	bool active;
 } DATA_CONNECTION;
 
 typedef struct /*_TOKEN*/ {

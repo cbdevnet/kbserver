@@ -1,6 +1,142 @@
+int conn_handle_read(ARGUMENTS* args, CONFIG* cfg, unsigned connection){
+	int bytes;
+
+	bytes=recv(cfg->inputs[connection]->conn.fd, (&(cfg->inputs[connection]->data_buf))+cfg->inputs[connection]->data_offset, sizeof(cfg->inputs[connection]->data_buf)-1-cfg->inputs[connection]->data_offset, 0);
+
+	if(bytes<=0){
+		perror("read");
+		close(cfg->inputs[connection]->conn.fd);
+		cfg->inputs[connection]->conn.fd=-1;
+		cfg->inputs[connection]->active=false;
+		return 0;
+	}
+
+	//DEBUG
+	fprintf(stderr, "TEMP: Discarded %d bytes of input from connection %d\n", bytes, connection);
+	cfg->inputs[connection]->data_offset=0;
+
+	return 0;
+}
+
+int conn_handle_new(ARGUMENTS* args, CONFIG* cfg, unsigned connection){
+	unsigned pos;
+	
+	if(cfg->inputs){
+		//find slot
+		for(pos=0;cfg->inputs[pos];pos++){
+			if(!cfg->inputs[pos]->active&&cfg->inputs[pos]->conn.type==CONN_INCOMING){
+				if(args->verbosity>2){
+					fprintf(stderr, "Accepting new client into existing slot %d\n", pos);
+				}
+				break;
+			}
+		}
+
+		if(!cfg->inputs[pos]){
+			//realloc
+			cfg->inputs=realloc(cfg->inputs, (pos+2)*sizeof(DATA_CONNECTION*));
+			if(!cfg->inputs){
+				//TODO errmsg
+				return -2;
+			}
+			cfg->inputs[pos+1]=NULL;
+			cfg->inputs[pos]=malloc(sizeof(DATA_CONNECTION));
+			if(!cfg->inputs[pos]){
+				//TODO errmsg
+				return -2;
+			}
+			cfg->inputs[pos]->conn.type=CONN_INCOMING;
+			if(args->verbosity>2){
+				fprintf(stderr, "Accepting new client into created slot %d\n", pos);
+			}
+		}
+	}
+	else{
+		//allocate initial
+		cfg->inputs=malloc(2*sizeof(DATA_CONNECTION*));
+		if(!cfg->inputs){
+			//TODO errmsg
+			return -2;
+		}
+		cfg->inputs[1]=NULL;
+		pos=0;
+		cfg->inputs[pos]=malloc(sizeof(DATA_CONNECTION));
+		if(!cfg->inputs[pos]){
+			//TODO errmsg
+			return -2;
+		}
+		cfg->inputs[pos]->conn.type=CONN_INCOMING;
+			if(args->verbosity>2){
+			fprintf(stderr, "Accepting new client into inital slot %d\n", pos);
+		}
+	}
+
+	//insert connection
+	cfg->inputs[pos]->active=true;
+	cfg->inputs[pos]->data_offset=0;
+	cfg->inputs[pos]->last_event=0;
+	cfg->inputs[pos]->conn.fd=accept(cfg->listen_socks[connection]->fd, NULL, NULL);	
+	return 0;
+}
+
 int conn_process_blocking(ARGUMENTS* args, CONFIG* cfg){
-	//TODO
-	return -1;
+	fd_set read_fds;
+	struct timeval tv;
+	int maxfd=-1, error;
+	unsigned i;
+
+	FD_ZERO(&read_fds);
+	
+	//add all listen sockets
+	if(cfg->listen_socks){
+		for(i=0;cfg->listen_socks[i];i++){
+			FD_SET(cfg->listen_socks[i]->fd, &read_fds);
+			maxfd=(maxfd>cfg->listen_socks[i]->fd)?maxfd:cfg->listen_socks[i]->fd;
+		}
+	}
+
+	//add active client sockets
+	if(cfg->inputs){
+		for(i=0;cfg->inputs[i];i++){
+			if(cfg->inputs[i]->active){
+				FD_SET(cfg->inputs[i]->conn.fd, &read_fds);
+				maxfd=(maxfd>cfg->inputs[i]->conn.fd)?maxfd:cfg->inputs[i]->conn.fd;
+			}
+		}
+	}
+
+	//prepare timeouts
+	tv.tv_sec=SELECT_TIMEOUT;
+	tv.tv_usec=0;
+
+	//select
+	error=select(maxfd+1, &read_fds, NULL, NULL, &tv);
+	if(error<0){
+		perror("select");
+		return -1;
+	}
+	
+	//test listening sockets
+	if(cfg->listen_socks){
+		for(i=0;cfg->listen_socks[i];i++){
+			if(FD_ISSET(cfg->listen_socks[i]->fd, &read_fds)){
+				error=conn_handle_new(args, cfg, i);
+				//TODO handle return value
+			}
+		}
+	}
+
+	//handle client reads
+	if(cfg->inputs){
+		for(i=0;cfg->inputs[i];i++){
+			if(cfg->inputs[i]->active&&FD_ISSET(cfg->inputs[i]->conn.fd, &read_fds)){
+				error=conn_handle_read(args, cfg, i);
+				//TODO handle return value
+			}
+		}
+	}
+
+	return 0;
 }
 
 bool conn_open(CONNECTION* conn){
@@ -77,6 +213,29 @@ bool conn_open(CONNECTION* conn){
 	return true;
 }
 
+bool conn_reconnect(ARGUMENTS* args, CONFIG* cfg){
+	unsigned i;
+	if(cfg->inputs){
+		for(i=0;cfg->inputs[i];i++){
+			if(!cfg->inputs[i]->active&&cfg->inputs[i]->conn.type==CONN_OUTGOING){
+				if(args->verbosity>1){
+					fprintf(stderr, "Reestablishing connection to %s Port %d\n", cfg->inputs[i]->conn.spec.hostname, cfg->inputs[i]->conn.spec.port);
+				}
+
+				if(!conn_open(&(cfg->inputs[i]->conn))){
+					fprintf(stderr, "Failed to reconnect %s Port %d\n", cfg->inputs[i]->conn.spec.hostname, cfg->inputs[i]->conn.spec.port);
+					return false;
+				}
+
+				cfg->inputs[i]->last_event=0;
+				cfg->inputs[i]->data_offset=0;
+				cfg->inputs[i]->active=true;
+			}
+		}
+	}
+	return true;
+}
+
 bool conn_init(ARGUMENTS* args, CONFIG* cfg){
 	unsigned pos;
 	
@@ -105,6 +264,10 @@ bool conn_init(ARGUMENTS* args, CONFIG* cfg){
 					fprintf(stderr, "Failed to connect to %s Port %d\n", cfg->inputs[pos]->conn.spec.hostname, cfg->inputs[pos]->conn.spec.port);
 					return false;
 				}
+
+				cfg->inputs[pos]->data_offset=0;
+				cfg->inputs[pos]->last_event=0;
+				cfg->inputs[pos]->active=true;
 			}
 		}
 	}

@@ -70,21 +70,12 @@ int main(int argc, char** argv){
 	//begin execution
 	while(!stop_processing){
 		status=conn_process_blocking(&args, &cfg);
-		//add all fds to read set
-		//select over set
-		//iterate over results
-			//listen socket -> accept client
-			//use or create CONN_INCOMING entry
-
-			//data socket -> read data
-			//if closed, mark data inactive
-
 		if(status<0){
 			//TODO errhandling
 		}
 
 		status=logic_process_incoming(&args, &cfg);
-		//iterate over active date connections
+		//iterate over active data connections
 			//if timeout -> clear buffer
 			//match data to token
 			//resolve token to command/action
@@ -94,6 +85,8 @@ int main(int argc, char** argv){
 		if(status<0){
 			//TODO errhandling
 		}
+
+		conn_reconnect(&args, &cfg);
 	}
 
 	//clean up
