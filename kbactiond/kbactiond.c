@@ -74,13 +74,6 @@ int main(int argc, char** argv){
 		}
 
 		status=logic_process_incoming(&args, &cfg);
-		//iterate over active data connections
-			//if timeout -> clear buffer
-			//match data to token
-			//resolve token to command/action
-			//if necessary, execute
-			//update last action timestamp
-
 		if(status<0){
 			//TODO errhandling
 		}

@@ -1,10 +1,22 @@
 int conn_handle_read(ARGUMENTS* args, CONFIG* cfg, unsigned connection){
-	int bytes;
+	int bytes, bytes_left;
 
-	bytes=recv(cfg->inputs[connection]->conn.fd, (&(cfg->inputs[connection]->data_buf))+cfg->inputs[connection]->data_offset, sizeof(cfg->inputs[connection]->data_buf)-1-cfg->inputs[connection]->data_offset, 0);
+	bytes_left=sizeof(cfg->inputs[connection]->data_buf)-1-cfg->inputs[connection]->data_offset;
+	
+	if(bytes_left<1){
+		return -1;
+	}
+
+	if(args->verbosity>3){
+		fprintf(stderr, "Reading at max %d bytes from connection %d (Offset %d)\n", bytes_left, connection, cfg->inputs[connection]->data_offset);
+	}
+
+	bytes=recv(cfg->inputs[connection]->conn.fd, (&(cfg->inputs[connection]->data_buf))+cfg->inputs[connection]->data_offset, bytes_left, 0);
 
 	if(bytes<=0){
-		perror("read");
+		if(bytes<0){
+			perror("read");
+		}
 		close(cfg->inputs[connection]->conn.fd);
 		cfg->inputs[connection]->conn.fd=-1;
 		cfg->inputs[connection]->active=false;
@@ -15,13 +27,7 @@ int conn_handle_read(ARGUMENTS* args, CONFIG* cfg, unsigned connection){
 		return 0;
 	}
 
-	cfg->inputs[connection]->data_offset=bytes;
-
-	//TODO if buffer full, discard
-
-	//DEBUG
-	fprintf(stderr, "TEMP: Discarded %d bytes of input from connection %d\n", bytes, connection);
-	cfg->inputs[connection]->data_offset=0;
+	cfg->inputs[connection]->data_offset+=bytes;
 
 	return 0;
 }
