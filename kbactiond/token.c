@@ -18,6 +18,17 @@ const char* dbg_token_type(TOKEN_TYPE type){
 	return "UNKNOWN";
 }
 
+TOKEN* token_resolve(ARGUMENTS* args, CONFIG* cfg, TOKEN_TYPE* out_type, char* input){
+
+	//DEBUG
+	printf("Resolving \"%s\"...\n", input);
+
+	if(out_type){
+		*out_type=T_INVALID;
+	}
+	return NULL;
+}
+
 bool token_add_mapping(CONFIG* cfg, char* name, char* action, TOKEN_TYPE type){
 	int insert_pos=0;
 	if(!cfg->tokens){

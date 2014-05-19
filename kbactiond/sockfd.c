@@ -131,6 +131,9 @@ int conn_process_blocking(ARGUMENTS* args, CONFIG* cfg){
 		perror("select");
 		return -1;
 	}
+	if(args->verbosity>3){
+		printf("Data on %d sockets\n", error);
+	}
 	
 	//test listening sockets
 	if(cfg->listen_socks){
