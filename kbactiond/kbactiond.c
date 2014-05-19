@@ -10,6 +10,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <time.h>
 
 #include "kbactiond.h"
 bool stop_processing=false;

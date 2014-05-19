@@ -49,7 +49,7 @@ typedef struct /*_DATA_CONN*/ {
 	char cmd_buf[COMMAND_BUFFER_LENGTH+1];
 	char data_buf[MAX_TOKEN_LENGTH+1];
 	unsigned data_offset;
-	int last_event;
+	time_t last_event;
 	bool active;
 } DATA_CONNECTION;
 
