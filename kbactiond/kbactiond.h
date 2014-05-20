@@ -18,7 +18,7 @@ typedef enum /*_CONN_TYPE*/ {
 } CONN_TYPE;
 
 typedef enum /*_TTYPE*/ {
-	T_INVALID,
+	T_NOMATCH,
 	T_INCOMPLETE,
 	T_START,
 	T_APPEND,

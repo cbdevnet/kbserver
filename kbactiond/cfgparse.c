@@ -99,10 +99,15 @@ CFG_LINE_STATUS cfg_handle_line(char* line, ARGUMENTS* args, CONFIG* cfg){
 			
 			//parse from last separator (type)
 			token_type=token_type_from_string(line);
+			if(token_type!=T_NOMATCH){
+				if(!token_add_mapping(cfg, token_name, token_command, token_type)){
+					rv=LINE_WARN;
+				}
+			}
+			else{
+				//FIXME print warning
+			}
 		
-		if(!token_add_mapping(cfg, token_name, token_command, token_type)){
-			rv=LINE_WARN;
-		}
 
 		free(token_name);
 		if(token_command){

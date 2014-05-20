@@ -1,7 +1,7 @@
 const char* dbg_token_type(TOKEN_TYPE type){
 	switch(type){
-		case T_INVALID:
-			return "T_INVALID";
+		case T_NOMATCH:
+			return "T_NOMATCH";
 		case T_INCOMPLETE:
 			return "T_INCOMPLETE";
 		case T_START:
@@ -19,14 +19,36 @@ const char* dbg_token_type(TOKEN_TYPE type){
 }
 
 TOKEN* token_resolve(ARGUMENTS* args, CONFIG* cfg, TOKEN_TYPE* out_type, char* input){
+	unsigned tok, i;
+	TOKEN_TYPE rv=T_NOMATCH;
+	TOKEN* resolved=NULL;
 
-	//DEBUG
-	printf("Resolving \"%s\"...\n", input);
+	for(tok=0;cfg->tokens[tok];tok++){
+		//full match -> set rv, resolved
+		
+		for(i=0;cfg->tokens[tok]->token[i]==input[i]&&cfg->tokens[tok]->token[i]!=0;i++){
+		}
+
+		if(input[i]==0&&cfg->tokens[tok]->token[i]==input[i]){
+			//complete match
+			resolved=cfg->tokens[tok];
+			rv=cfg->tokens[tok]->type;
+			break;
+		}
+		else if(input[i]==0&&i>0){
+			//partial match
+			rv=T_INCOMPLETE;		
+		}
+		else{
+			//no match
+		}
+	}
+
 
 	if(out_type){
-		*out_type=T_INVALID;
+		*out_type=rv;
 	}
-	return NULL;
+	return resolved;
 }
 
 bool token_add_mapping(CONFIG* cfg, char* name, char* action, TOKEN_TYPE type){
@@ -96,5 +118,5 @@ TOKEN_TYPE token_type_from_string(char* in){
 	else if(!strncmp(in, "EXEC", 4)){
 		return T_EXEC;
 	}
-	return T_INVALID;
+	return T_NOMATCH;
 }

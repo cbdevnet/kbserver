@@ -1,8 +1,8 @@
 int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
-unsigned i, head_off=0, tail_off, c;
+	unsigned i, head_off=0, tail_off, c;
 	time_t current_time;
 	char char_buf;
-	TOKEN_TYPE token_type=T_INVALID;
+	TOKEN_TYPE token_type=T_NOMATCH;
 	TOKEN* token;
 
 	for(i=0;cfg->inputs[i];i++){
@@ -26,7 +26,17 @@ unsigned i, head_off=0, tail_off, c;
 					token=token_resolve(args, cfg, &token_type, cfg->inputs[i]->data_buf+head_off);
 					cfg->inputs[i]->data_buf[tail_off]=char_buf;
 
-					//FIXME if incomplete & tail_off!=end, kill anyway
+					//if incomplete & tail_off!=end, kill anyway
+					if(token_type==T_INCOMPLETE&&tail_off<cfg->inputs[i]->data_offset){
+						if(args->verbosity>3){
+							fprintf(stderr, "Incomplete match at invalid position\n");
+						}
+						token_type=T_NOMATCH;
+					}
+
+					if(token_type!=T_NOMATCH){
+						break;
+					}
 
 					if(tail_off-1<=head_off){
 						tail_off=cfg->inputs[i]->data_offset;
@@ -36,6 +46,10 @@ unsigned i, head_off=0, tail_off, c;
 
 				if(head_off>0){
 					//strip head_off bytes from head
+					if(args->verbosity>3){
+						fprintf(stderr, "Stripping %d bytes off head\n", head_off);
+					}
+
 					for(c=0;c<cfg->inputs[i]->data_offset-head_off;c++){
 						cfg->inputs[i]->data_buf[c]=cfg->inputs[i]->data_buf[c+head_off];
 					}
@@ -44,16 +58,28 @@ unsigned i, head_off=0, tail_off, c;
 					cfg->inputs[i]->data_offset-=head_off;
 				}
 
-				if(token_type!=T_INCOMPLETE){
-					//kill detected token
-					//update data_offset
+				if(cfg->inputs[i]->data_offset>0){
+					if(token_type!=T_INCOMPLETE){
+						if(args->verbosity>2){
+							fprintf(stderr, "Resolved to \"%s\" @ %s\n", (token->command)?(token->command):(token->token), dbg_token_type(token->type));
+						}
+
+						//kill detected token
+						for(c=0;c<cfg->inputs[i]->data_offset-strlen(token->token);c++){
+							cfg->inputs[i]->data_buf[c]=cfg->inputs[i]->data_buf[c+strlen(token->token)];
+						}
+						//update data_offset
+						cfg->inputs[i]->data_offset-=strlen(token->token);
+					}
+					else{
+						fprintf(stderr, "Incomplete token in %d bytes (\"%s\")\n", cfg->inputs[i]->data_offset, cfg->inputs[i]->data_buf);
+					}
+
+					//resolve to command/action
+					//fill cmd_buf
+					//execute
 					//TODO
 				}
-
-				//resolve to command/action
-				//fill cmd_buf
-				//execute
-				//TODO
 			}
 			
 			//update timestamp
