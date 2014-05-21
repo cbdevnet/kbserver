@@ -98,7 +98,32 @@ int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
 						if(token_type!=T_EXEC){
 							//fill cmd_buf
 							if(token->command[0]>0){
-								//TODO
+								switch(token_type){
+									case T_START:
+										strncpy(cfg->inputs[i]->cmd_buf, token->command, sizeof(cfg->inputs[i]->cmd_buf)-2);
+										cfg->inputs[i]->cmd_buf[strlen(token->command)]=' ';
+										cfg->inputs[i]->cmd_buf[strlen(token->command)+1]=0;
+										break;
+
+									case T_APPEND:
+									case T_DO:
+										strncpy(cfg->inputs[i]->cmd_buf+strlen(cfg->inputs[i]->cmd_buf), token->command, sizeof(cfg->inputs[i]->cmd_buf)-1-strlen(cfg->inputs[i]->cmd_buf));
+										break;
+
+									case T_PARAM:
+										if(sizeof(cfg->inputs[i]->cmd_buf)-1-strlen(cfg->inputs[i]->cmd_buf)>1){
+											//add space
+											cfg->inputs[i]->cmd_buf[strlen(cfg->inputs[i]->cmd_buf)+1]=0;
+											cfg->inputs[i]->cmd_buf[strlen(cfg->inputs[i]->cmd_buf)]=' ';
+											
+											//insert command
+											strncpy(cfg->inputs[i]->cmd_buf+strlen(cfg->inputs[i]->cmd_buf), token->command, sizeof(cfg->inputs[i]->cmd_buf)-1-strlen(cfg->inputs[i]->cmd_buf));
+										}
+										break;
+
+									default:
+										break;
+								}
 							}
 						}
 						else{
@@ -108,7 +133,7 @@ int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
 						}
 
 						//execute
-						if(token_type==T_DO){
+						if(token_type==T_DO&&cfg->inputs[i]->cmd_buf[0]>0){
 							//TODO check return value
 							logic_run_command(args, cfg->inputs[i]->cmd_buf);
 							cfg->inputs[i]->cmd_buf[0]=0;
