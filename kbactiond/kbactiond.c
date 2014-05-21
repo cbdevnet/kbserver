@@ -66,6 +66,7 @@ int main(int argc, char** argv){
 	//set up signal handlers
 	signal(SIGPIPE, SIG_IGN);
 	signal(SIGINT, sig_interrupt);
+	signal(SIGCHLD, SIG_IGN);
 
 	//begin execution
 	while(!stop_processing){
