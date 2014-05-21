@@ -1,10 +1,12 @@
 int logic_run_command(ARGUMENTS* args, char* command){
-	char* param[]={EXECUTOR, EXECUTOR_FLAG, command, NULL};
+	char* exec_args[]={EXECUTOR, EXECUTOR_FLAG, command, NULL};
 	switch(fork()){
 		case 0:
 			//child
-			fprintf(stderr, "Running \"%s\" in child\n", command);
-			execvp(param[0], param);
+			if(args->verbosity>2){
+				fprintf(stderr, "Running \"%s\" in child\n", command);
+			}
+			execvp(exec_args[0], exec_args);
 			perror("execvp");
 			exit(1);
 
@@ -101,18 +103,22 @@ int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
 						}
 						else{
 							//direct exec
+							//TODO check return value
 							logic_run_command(args, token->command);
 						}
 
 						//execute
 						if(token_type==T_DO){
+							//TODO check return value
 							logic_run_command(args, cfg->inputs[i]->cmd_buf);
 							cfg->inputs[i]->cmd_buf[0]=0;
 						}
 
 					}
 					else{
-						fprintf(stderr, "Incomplete token in %d bytes (\"%s\")\n", cfg->inputs[i]->data_offset, cfg->inputs[i]->data_buf);
+						if(args->verbosity>2){
+							fprintf(stderr, "Incomplete token in %d bytes (\"%s\")\n", cfg->inputs[i]->data_offset, cfg->inputs[i]->data_buf);
+						}
 					}
 				}
 			}
