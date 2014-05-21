@@ -1,3 +1,24 @@
+int logic_run_command(ARGUMENTS* args, char* command){
+	char* param[]={EXECUTOR, EXECUTOR_FLAG, command, NULL};
+	switch(fork()){
+		case 0:
+			//child
+			fprintf(stderr, "Running \"%s\" in child\n", command);
+			execvp(param[0], param);
+			perror("execvp");
+			exit(1);
+
+		case -1:
+			perror("fork");
+			break;
+
+		default:
+			return 0;
+	}
+
+	return -1;
+}
+
 int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
 	unsigned i, head_off=0, tail_off, c;
 	time_t current_time;
@@ -14,7 +35,7 @@ int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
 
 			//check timeout
 			if(current_time-cfg->inputs[i]->last_event>cfg->conn_timeout){
-				//command_offset=0
+				cfg->inputs[i]->cmd_buf[0]=0;
 			}
 
 			while(cfg->inputs[i]->data_offset>0&&token_type!=T_INCOMPLETE){
@@ -68,17 +89,31 @@ int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
 						for(c=0;c<cfg->inputs[i]->data_offset-strlen(token->token);c++){
 							cfg->inputs[i]->data_buf[c]=cfg->inputs[i]->data_buf[c+strlen(token->token)];
 						}
+
 						//update data_offset
 						cfg->inputs[i]->data_offset-=strlen(token->token);
+
+						if(token_type!=T_EXEC){
+							//fill cmd_buf
+							if(token->command[0]>0){
+								//TODO
+							}
+						}
+						else{
+							//direct exec
+							logic_run_command(args, token->command);
+						}
+
+						//execute
+						if(token_type==T_DO){
+							logic_run_command(args, cfg->inputs[i]->cmd_buf);
+							cfg->inputs[i]->cmd_buf[0]=0;
+						}
+
 					}
 					else{
 						fprintf(stderr, "Incomplete token in %d bytes (\"%s\")\n", cfg->inputs[i]->data_offset, cfg->inputs[i]->data_buf);
 					}
-
-					//resolve to command/action
-					//fill cmd_buf
-					//execute
-					//TODO
 				}
 			}
 			

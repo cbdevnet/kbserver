@@ -5,6 +5,8 @@
 #define MAX_CFGLINE_LENGTH (MAX_TOKEN_LENGTH+MAX_PART_LENGTH+128)
 #define LISTEN_QUEUE_LENGTH 64
 #define SELECT_TIMEOUT 20
+#define EXECUTOR "/bin/sh"
+#define EXECUTOR_FLAG "-c"
 
 typedef struct /*_ARGUMENTS*/ {
 	unsigned verbosity;

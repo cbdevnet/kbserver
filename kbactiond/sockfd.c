@@ -11,7 +11,7 @@ int conn_handle_read(ARGUMENTS* args, CONFIG* cfg, unsigned connection){
 		fprintf(stderr, "Reading at max %d bytes from connection %d (Offset %d)\n", bytes_left, connection, cfg->inputs[connection]->data_offset);
 	}
 
-	bytes=recv(cfg->inputs[connection]->conn.fd, (&(cfg->inputs[connection]->data_buf))+cfg->inputs[connection]->data_offset, bytes_left, 0);
+	bytes=recv(cfg->inputs[connection]->conn.fd, ((char*)&(cfg->inputs[connection]->data_buf))+cfg->inputs[connection]->data_offset, bytes_left, 0);
 
 	if(bytes<=0){
 		if(bytes<0){
@@ -28,6 +28,7 @@ int conn_handle_read(ARGUMENTS* args, CONFIG* cfg, unsigned connection){
 	}
 
 	cfg->inputs[connection]->data_offset+=bytes;
+	cfg->inputs[connection]->data_buf[cfg->inputs[connection]->data_offset]=0;
 
 	return 0;
 }
