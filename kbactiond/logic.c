@@ -101,23 +101,21 @@ int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
 								switch(token_type){
 									case T_START:
 										strncpy(cfg->inputs[i]->cmd_buf, token->command, sizeof(cfg->inputs[i]->cmd_buf)-2);
-										cfg->inputs[i]->cmd_buf[strlen(token->command)]=' ';
-										cfg->inputs[i]->cmd_buf[strlen(token->command)+1]=0;
+										strncat(cfg->inputs[i]->cmd_buf, " ", 1);
 										break;
 
 									case T_APPEND:
 									case T_DO:
-										strncpy(cfg->inputs[i]->cmd_buf+strlen(cfg->inputs[i]->cmd_buf), token->command, sizeof(cfg->inputs[i]->cmd_buf)-1-strlen(cfg->inputs[i]->cmd_buf));
+										strncat(cfg->inputs[i]->cmd_buf, token->command, sizeof(cfg->inputs[i]->cmd_buf)-1-strlen(cfg->inputs[i]->cmd_buf));
 										break;
 
 									case T_PARAM:
 										if(sizeof(cfg->inputs[i]->cmd_buf)-1-strlen(cfg->inputs[i]->cmd_buf)>1){
 											//add space
-											cfg->inputs[i]->cmd_buf[strlen(cfg->inputs[i]->cmd_buf)+1]=0;
-											cfg->inputs[i]->cmd_buf[strlen(cfg->inputs[i]->cmd_buf)]=' ';
-											
-											//insert command
-											strncpy(cfg->inputs[i]->cmd_buf+strlen(cfg->inputs[i]->cmd_buf), token->command, sizeof(cfg->inputs[i]->cmd_buf)-1-strlen(cfg->inputs[i]->cmd_buf));
+											strncat(cfg->inputs[i]->cmd_buf, " ", 1);
+
+											//insert parameter
+											strncat(cfg->inputs[i]->cmd_buf, token->command, sizeof(cfg->inputs[i]->cmd_buf)-1-strlen(cfg->inputs[i]->cmd_buf));
 										}
 										break;
 
