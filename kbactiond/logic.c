@@ -105,6 +105,9 @@ int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
 										break;
 
 									case T_APPEND:
+										if(cfg->inputs[i]->cmd_buf[0]==0){
+											break;
+										}
 									case T_DO:
 										strncat(cfg->inputs[i]->cmd_buf, token->command, sizeof(cfg->inputs[i]->cmd_buf)-1-strlen(cfg->inputs[i]->cmd_buf));
 										break;
