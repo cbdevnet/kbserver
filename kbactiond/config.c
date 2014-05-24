@@ -27,10 +27,12 @@ bool cfg_parse_connspec(CONN_SPEC* spec, char* input){
 bool cfg_store_data_connspec(CONFIG* cfg, CONN_SPEC* conn){
 	unsigned num;
 	CONN_SPEC new_conn=*conn;
-	//TODO error checking
 	
 	if(!cfg->inputs){
 		cfg->inputs=realloc(cfg->inputs, 2*sizeof(DATA_CONNECTION*));
+		if(!cfg->inputs){
+			return false;
+		}
 		cfg->inputs[1]=NULL;
 		num=0;
 	}
@@ -39,10 +41,16 @@ bool cfg_store_data_connspec(CONFIG* cfg, CONN_SPEC* conn){
 		for(num=0;cfg->inputs[num];num++){
 		}
 		cfg->inputs=realloc(cfg->inputs, (num+2)*sizeof(DATA_CONNECTION*));
+		if(!cfg->inputs){
+			return false;
+		}
 		cfg->inputs[num+1]=NULL;
 	}
 	
 	cfg->inputs[num]=malloc(sizeof(DATA_CONNECTION));
+	if(!cfg->inputs[num]){
+		return false;
+	}
 	cfg->inputs[num]->conn.spec=new_conn;
 	cfg->inputs[num]->conn.type=CONN_OUTGOING;
 
@@ -52,10 +60,12 @@ bool cfg_store_data_connspec(CONFIG* cfg, CONN_SPEC* conn){
 bool cfg_store_listen_connspec(CONFIG* cfg, CONN_SPEC* conn){
 	unsigned num;
 	CONN_SPEC new_conn=*conn;
-	//TODO error checking
 	
 	if(!cfg->listen_socks){
 		cfg->listen_socks=realloc(cfg->listen_socks, 2*sizeof(CONNECTION*));
+		if(!cfg->listen_socks){
+			return false;
+		}
 		cfg->listen_socks[1]=NULL;
 		num=0;
 	}
@@ -64,10 +74,16 @@ bool cfg_store_listen_connspec(CONFIG* cfg, CONN_SPEC* conn){
 		for(num=0;cfg->listen_socks[num];num++){
 		}
 		cfg->listen_socks=realloc(cfg->listen_socks, (num+2)*sizeof(CONNECTION*));
+		if(!cfg->listen_socks){
+			return false;
+		}
 		cfg->listen_socks[num+1]=NULL;
 	}
 	
 	cfg->listen_socks[num]=malloc(sizeof(CONNECTION));
+	if(!cfg->listen_socks[num]){
+		return false;
+	}
 	cfg->listen_socks[num]->spec=new_conn;
 	cfg->listen_socks[num]->type=CONN_LISTEN;
 
@@ -121,7 +137,6 @@ bool cfg_free(CONFIG* cfg){
 	if(cfg->listen_socks){
 		for(i=0;cfg->listen_socks[i];i++){
 			if(cfg->listen_socks[i]->fd>0){
-				//FIXME use cross-platform calls here
 				close(cfg->listen_socks[i]->fd);
 				cfg->listen_socks[i]->fd=-1;
 			}
@@ -135,7 +150,6 @@ bool cfg_free(CONFIG* cfg){
 	if(cfg->inputs){
 		for(i=0;cfg->inputs[i];i++){
 			if(cfg->inputs[i]->conn.fd>0){
-				//FIXME use cross-platform calls here
 				close(cfg->inputs[i]->conn.fd);
 				cfg->inputs[i]->conn.fd=-1;
 			}
