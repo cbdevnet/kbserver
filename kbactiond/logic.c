@@ -58,11 +58,14 @@ int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
 					}
 
 					if(token_type!=T_NOMATCH){
+						if(args->verbosity>2){
+							fprintf(stderr, "Resolved %d-%d to \"%s\" (%s)\n", head_off, tail_off, (token->command)?(token->command):(token->token), dbg_token_type(token->type));
+						}
 						break;
 					}
 
 					if(tail_off-1<=head_off){
-						tail_off=cfg->inputs[i]->data_offset;
+						tail_off=cfg->inputs[i]->data_offset+1;
 						head_off++;
 					}
 				}
@@ -70,7 +73,7 @@ int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
 				if(head_off>0){
 					//strip head_off bytes from head
 					if(args->verbosity>3){
-						fprintf(stderr, "Stripping %d bytes off head\n", head_off);
+						fprintf(stderr, "Stripping %d bytes off head, data_offset is %d\n", head_off, cfg->inputs[i]->data_offset);
 					}
 
 					for(c=0;c<cfg->inputs[i]->data_offset-head_off;c++){
@@ -79,13 +82,12 @@ int logic_process_incoming(ARGUMENTS* args, CONFIG* cfg){
 
 					//update data_offset
 					cfg->inputs[i]->data_offset-=head_off;
+
+					head_off=0;
 				}
 
 				if(cfg->inputs[i]->data_offset>0){
 					if(token_type!=T_INCOMPLETE){
-						if(args->verbosity>2){
-							fprintf(stderr, "Resolved to \"%s\" @ %s\n", (token->command)?(token->command):(token->token), dbg_token_type(token->type));
-						}
 
 						//kill detected token
 						for(c=0;c<cfg->inputs[i]->data_offset-strlen(token->token);c++){
