@@ -1,12 +1,12 @@
-Build prerequistes
-------------------
+Build prerequisites
+-------------------
 	- A Linux system (needs linux/input.h)
 
 To compile, run make.
 
 Config file format
 ------------------
-Configuration for kbserver instances in stored in config files,
+Configuration for kbserver instances is stored in config files,
 containing one directive per line.
 A # at the beginning of a line makes that line a comment.
 
