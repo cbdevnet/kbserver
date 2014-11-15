@@ -1,4 +1,8 @@
-.PHONY: all
+CFLAGS=-Wall -g
 
-all:
-	$(CC) -g -Wall kbactiond.c -o kbactiond
+all: kbactiond
+
+kbactiond: kbactiond.c
+
+clean:
+	rm kbactiond

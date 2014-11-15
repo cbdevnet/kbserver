@@ -1,4 +1,8 @@
-.PHONY: all
+CFLAGS=-Wall -g
 
-all:
-	$(CC) -Wall -g kbserver.c -o kbserver
+all: kbserver
+
+kbserver: kbserver.c
+
+clean:
+	rm kbserver

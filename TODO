@@ -2,9 +2,8 @@ kbserver
 --------
 Strings containing \0 are cut off
 Display usage info
-
+Keyup events
 
 kbactiond
 ---------
-Implement.
 
