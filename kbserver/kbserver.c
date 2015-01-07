@@ -28,7 +28,7 @@
 #include "led.c"
 
 int usage(char* fn){
-	printf("garfield-pos kbserver utility\n\n");	
+	printf("kbserver v%s\n\n", VERSION);	
 	printf("Exposes evdev input via TCP in a configurable fashion\n");	
 	printf("Usage:\n");
 	printf("\t%s -f <config file>\n", fn);
@@ -77,7 +77,7 @@ int main(int argc, char** argv){
 		exit(error);
 	}
 
-	printf("kbserver v%s starting\n",VERSION);
+	printf("kbserver v%s starting\n", VERSION);
 	
 	if(!cfg_sanity_check(&cfg)){
 		fprintf(stderr, "Config failed the sanity check, aborting\n");

@@ -1,4 +1,4 @@
-#define _VERSION "0.1"
+#define _VERSION "0.2"
 #define COMMAND_BUFFER_LENGTH 512
 #define MAX_TOKEN_LENGTH 128
 #define MAX_PART_LENGTH 64
