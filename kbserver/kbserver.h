@@ -1,4 +1,4 @@
-#define VERSION "0.2 it worketh"
+#define VERSION "1.0rc1"
 
 #define MAX_CFGLINE_LENGTH 1024
 #define LISTEN_QUEUE_LENGTH 30

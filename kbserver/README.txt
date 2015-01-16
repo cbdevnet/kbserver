@@ -22,8 +22,11 @@ Valid directives:
 		the raw 16-bit scancode
 	exclusive <true|false>
 		Request exclusive access to the device
-	map <scancode> <stringspec>
-		Map a key scancode to a string to be output
+	map <scancode> [<mode>] <stringspec>
+		Map a key scancode to a stringspec to be output
+		The optional mode identifier can be either UP
+		or DOWN in order to set individual output strings
+		for pressing and releasing keys
 
 The stringspec format used for defining mappings allows for
 the use of arbitrary bytes such as newlines and other control
