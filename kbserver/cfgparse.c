@@ -87,9 +87,7 @@ int parse_config(char* input_file, CONFIG_PARAMS* cfg){
 
 			//keep legacy compatability
 			if(!isdigit(endptr[0])&&endptr[0]!='\''){
-				printf("In check");
 				if(!strncmp(endptr, "DOWN", 4)){
-					printf("USING DOWN");
 					mode=MODE_DOWN;
 				}
 				//skip beyond keymode
@@ -98,7 +96,6 @@ int parse_config(char* input_file, CONFIG_PARAMS* cfg){
 				//skip spaces
 				for(;isspace(endptr[0]);endptr++){
 				}
-				printf(" NOW AT %c\n", endptr[0]);
 			}
 
 			//read mapped string
