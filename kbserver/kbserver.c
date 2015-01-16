@@ -141,30 +141,28 @@ int main(int argc, char** argv){
 
 			//handle event data
 			if(ev_data.type==EV_KEY){
-				if(ev_data.value==0){
-					//key press
-					char* map_target=map_get(&cfg, ev_data.code);
-					if(cfg.verbosity>3){
-						fprintf(stderr, "Read scancode %d, mapped to \"%s\"\n", ev_data.code, (map_target)?map_target:"NULL");
-					}
-					if(map_target||cfg.send_raw){
-						//send data
-						for(i=0;i<LISTEN_QUEUE_LENGTH;i++){
-							if(client_fds[i]>0){
-								if(map_target){
-									bytes=send(client_fds[i], map_target, strlen(map_target), 0);
-									if(bytes<strlen(map_target)&&cfg.verbosity>1){
-										fprintf(stderr, "Incomplete send\n");
-									}
+				//key press
+				char* map_target=map_get(&cfg, ev_data.code, ev_data.value);
+				if(cfg.verbosity>3){
+					fprintf(stderr, "Read scancode %d in mode %d, mapped to \"%s\"\n", ev_data.code, ev_data.value, (map_target)?map_target:"NULL");
+				}
+				if(map_target||cfg.send_raw){
+					//send data
+					for(i=0;i<LISTEN_QUEUE_LENGTH;i++){
+						if(client_fds[i]>0){
+							if(map_target){
+								bytes=send(client_fds[i], map_target, strlen(map_target), 0);
+								if(bytes<strlen(map_target)&&cfg.verbosity>1){
+									fprintf(stderr, "Incomplete send\n");
 								}
-								else{
-									bytes=send(client_fds[i], &(ev_data.code), sizeof(ev_data.code), 0);
-								}
-								if(bytes<0){
-									perror("client_send");
-									close(client_fds[i]);
-									client_fds[i]=-1;
-								}
+							}
+							else{
+								bytes=send(client_fds[i], &(ev_data.code), sizeof(ev_data.code), 0);
+							}
+							if(bytes<0){
+								perror("client_send");
+								close(client_fds[i]);
+								client_fds[i]=-1;
 							}
 						}
 					}

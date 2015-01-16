@@ -1,4 +1,4 @@
-MAPPING* map_elem(CONFIG_PARAMS* cfg, uint16_t scancode, bool create){
+MAPPING* map_elem(CONFIG_PARAMS* cfg, uint16_t scancode, KEYMODE mode, bool create){
 	MAPPING* iter;
 
 	if(!cfg->mapping_head||cfg->mapping_head->scancode>scancode){
@@ -9,13 +9,14 @@ MAPPING* map_elem(CONFIG_PARAMS* cfg, uint16_t scancode, bool create){
 
 		MAPPING* new=calloc(1,sizeof(MAPPING));
 		new->scancode=scancode;
+		new->mode=mode;
 		new->next=cfg->mapping_head;
 		cfg->mapping_head=new;
 		return new;
 	}
 	
 	for(iter=cfg->mapping_head;iter!=NULL;iter=iter->next){
-		if(iter->scancode==scancode){
+		if(iter->scancode==scancode&&iter->mode==mode){
 			//use existing element
 			return iter;
 		}
@@ -27,6 +28,7 @@ MAPPING* map_elem(CONFIG_PARAMS* cfg, uint16_t scancode, bool create){
 
 			MAPPING* new=calloc(1,sizeof(MAPPING));
 			new->scancode=scancode;
+			new->mode=mode;
 			new->next=iter->next;
 			iter->next=new;
 			return new;
@@ -39,6 +41,7 @@ MAPPING* map_elem(CONFIG_PARAMS* cfg, uint16_t scancode, bool create){
 
 			MAPPING* new=calloc(1,sizeof(MAPPING));
 			new->scancode=scancode;
+			new->mode=mode;
 			new->next=NULL;
 			iter->next=new;
 			return new;
@@ -49,12 +52,12 @@ MAPPING* map_elem(CONFIG_PARAMS* cfg, uint16_t scancode, bool create){
 	return NULL;
 }
 
-bool map_add(CONFIG_PARAMS* cfg, uint16_t scancode, char* output){
+bool map_add(CONFIG_PARAMS* cfg, uint16_t scancode, KEYMODE mode, char* output){
 	if(cfg->verbosity>2){
 		fprintf(stderr, "Mapping scancode %d to \"%s\"\n", scancode, output);
 	}
 
-	MAPPING* element=map_elem(cfg, scancode, true);
+	MAPPING* element=map_elem(cfg, scancode, mode, true);
 	if(!element){
 		return false;
 	}
@@ -67,8 +70,8 @@ bool map_add(CONFIG_PARAMS* cfg, uint16_t scancode, char* output){
 	return true;
 }
 
-char* map_get(CONFIG_PARAMS* cfg, uint16_t scancode){
-	MAPPING* element=map_elem(cfg, scancode, false);
+char* map_get(CONFIG_PARAMS* cfg, uint16_t scancode, KEYMODE mode){
+	MAPPING* element=map_elem(cfg, scancode, mode, false);
 	return (element)?element->map_target:NULL;
 }
 

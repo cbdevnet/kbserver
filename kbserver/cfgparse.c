@@ -11,7 +11,7 @@ void line_strip_trail(char* line){
 }
 
 int parse_config(char* input_file, CONFIG_PARAMS* cfg){
-	int offset, param;	
+	int offset, param;
 	char line_buffer[MAX_CFGLINE_LENGTH+1];
 	FILE* handle=fopen(input_file, "r");
 
@@ -77,19 +77,38 @@ int parse_config(char* input_file, CONFIG_PARAMS* cfg){
 			//handle map line
 			char* endptr;
 			char* map_target;
+			KEYMODE mode=MODE_UP;
 
 			uint16_t scancode=strtoul(line_buffer+param, &endptr, 10);
 			
+			//skip beyond scancode
 			for(;isspace(endptr[0]);endptr++){
 			}
 
+			//keep legacy compatability
+			if(!isdigit(endptr[0])&&endptr[0]!='\''){
+				printf("In check");
+				if(!strncmp(endptr, "DOWN", 4)){
+					printf("USING DOWN");
+					mode=MODE_DOWN;
+				}
+				//skip beyond keymode
+				for(;!isspace(endptr[0]);endptr++){
+				}
+				//skip spaces
+				for(;isspace(endptr[0]);endptr++){
+				}
+				printf(" NOW AT %c\n", endptr[0]);
+			}
+
+			//read mapped string
 			map_target=cfg_parse_string(endptr);
 			if(!map_target){
 				fprintf(stderr, "Failed to translate string: %s (Scancode %d)\n", endptr, scancode);
 				continue;
 			}
 
-			if(!map_add(cfg, scancode, map_target)){
+			if(!map_add(cfg, scancode, mode, map_target)){
 				fprintf(stderr, "Failed to add mapping for scancode %d\n", scancode);
 				free(map_target);
 				continue;

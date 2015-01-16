@@ -3,8 +3,14 @@
 #define MAX_CFGLINE_LENGTH 1024
 #define LISTEN_QUEUE_LENGTH 30
 
+typedef enum /*_KEYMODE*/ {
+	MODE_UP=0,
+	MODE_DOWN=1
+} KEYMODE;
+
 typedef struct _MAPPING {
 	uint16_t scancode;
+	KEYMODE mode;
 	char* map_target;
 	struct _MAPPING* next;
 } MAPPING;
