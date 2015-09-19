@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <ctype.h>
-#include <malloc.h>
 #include <inttypes.h>
 #include <signal.h>
 #include <sys/types.h>
