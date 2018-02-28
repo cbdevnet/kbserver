@@ -1,6 +1,6 @@
 int evin_open(CONFIG_PARAMS* cfg){
 	int status;
-	int fd=open(cfg->input_device, O_RDONLY);
+	int fd=open(cfg->input_device, O_RDONLY | O_NONBLOCK);
 
 	if(fd<0){
 		perror("evin_open");
