@@ -111,6 +111,18 @@ int parse_config(char* input_file, CONFIG_PARAMS* cfg){
 				continue;
 			}
 		}
+		else if(!strncmp(line_buffer+offset, "socket_type", 11)){
+			//handle socket_type line
+			if(!strncmp(line_buffer+param, "unix", 4)){
+				cfg->socket_type=UNIX_SOCKET;
+			} else {
+				cfg->socket_type=TCP_SOCKET;
+			}
+		}
+		else if(!strncmp(line_buffer+offset, "socket_file", 11)){
+			cfg->unix_socket_location=calloc(strlen(line_buffer+param)+1, sizeof(char));
+			strncpy(cfg->unix_socket_location, line_buffer+param, strlen(line_buffer+param));
+		}
 		else{
 			fprintf(stderr, "Unrecognized config line: %s\n",line_buffer+offset);
 		}
