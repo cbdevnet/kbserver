@@ -1,3 +1,6 @@
+#include <sys/socket.h>
+#include <sys/un.h>
+
 int conn_handle_read(ARGUMENTS* args, CONFIG* cfg, unsigned connection){
 	int bytes, bytes_left;
 
@@ -159,7 +162,7 @@ int conn_process_blocking(ARGUMENTS* args, CONFIG* cfg){
 	return 0;
 }
 
-bool conn_open(CONNECTION* conn){
+bool conn_open_tcp(CONNECTION* conn){
 	int status;
 	char port[10];
 
@@ -188,7 +191,7 @@ bool conn_open(CONNECTION* conn){
 
 	for(list_it=list;list_it!=NULL;list_it=list_it->ai_next){
 		conn->fd=socket(list_it->ai_family, list_it->ai_socktype, list_it->ai_protocol);
-		
+
 		if(conn->fd<0){
 			continue;
 		}
@@ -225,12 +228,72 @@ bool conn_open(CONNECTION* conn){
 	}
 
 	freeaddrinfo(list);
-	
+
 	if(!list_it){
 		return false;
 	}
-	
+
 	return true;
+}
+
+bool conn_open_unix(CONNECTION* conn){
+	int status;
+
+	struct sockaddr_un addr;
+
+
+	if(conn->type!=CONN_LISTEN&&conn->type!=CONN_OUTGOING){
+		return false;
+	}
+
+	if ((conn->fd = socket(PF_UNIX, SOCK_STREAM, 0)) < 0) {
+		fprintf(stderr, "Could not create UNIX-socket!\n");
+		return -1;
+	}
+
+
+	memset(&addr, 0, sizeof(addr));
+	addr.sun_family = AF_UNIX;
+	strcpy(addr.sun_path, conn->spec.hostname);
+
+	if(conn->type==CONN_LISTEN){
+		unlink(conn->spec.hostname);
+
+		if (bind(conn->fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+			fprintf(stderr, "Could not bind to socket!\n");
+			close(conn->fd);
+			conn->fd=-1;
+			return false;
+		}
+
+		status=listen(conn->fd, LISTEN_QUEUE_LENGTH);
+		if (status<0){
+			perror("conn_open/listen");
+			close(conn->fd);
+			conn->fd=-1;
+			return false;
+		}
+
+	}
+	else if(conn->type==CONN_OUTGOING){
+		if (connect(conn->fd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
+			perror("conn_open/connect");
+			close(conn->fd);
+			conn->fd=-1;
+			return -1;
+		}
+	}
+
+	return true;
+}
+
+
+bool conn_open(CONNECTION* conn){
+	if (conn->spec.socket_type == TCP_SOCKET) {
+		return conn_open_tcp(conn);
+	} else {
+		return conn_open_unix(conn);
+	}
 }
 
 bool conn_reconnect(ARGUMENTS* args, CONFIG* cfg){
@@ -263,10 +326,18 @@ bool conn_init(ARGUMENTS* args, CONFIG* cfg){
 	if(cfg->listen_socks){
 		for(pos=0;cfg->listen_socks[pos];pos++){
 			if(args->verbosity>1){
-				fprintf(stderr, "Opening listening socket on %s Port %d\n", cfg->listen_socks[pos]->spec.hostname, cfg->listen_socks[pos]->spec.port);
+				if (cfg->listen_socks[pos]->spec.socket_type == TCP_SOCKET) {
+					fprintf(stderr, "Opening listening socket on %s Port %d\n", cfg->listen_socks[pos]->spec.hostname, cfg->listen_socks[pos]->spec.port);
+				} else {
+					fprintf(stderr, "Opening listening unix-socket on %s\n", cfg->listen_socks[pos]->spec.hostname);
+				}
 			}
 			if(!conn_open(cfg->listen_socks[pos])){
-				fprintf(stderr, "Failed to open listening socket on %s Port %d\n", cfg->listen_socks[pos]->spec.hostname, cfg->listen_socks[pos]->spec.port);
+				if (cfg->listen_socks[pos]->spec.socket_type == TCP_SOCKET) {
+					fprintf(stderr, "Failed to open listening socket on %s Port %d\n", cfg->listen_socks[pos]->spec.hostname, cfg->listen_socks[pos]->spec.port);
+				} else {
+					fprintf(stderr, "Failed to open listening unix-socket on %s\n", cfg->listen_socks[pos]->spec.hostname);
+				}
 				return false;
 			}
 		}
@@ -277,11 +348,21 @@ bool conn_init(ARGUMENTS* args, CONFIG* cfg){
 		for(pos=0;cfg->inputs[pos];pos++){
 			if(cfg->inputs[pos]->conn.type==CONN_OUTGOING){
 				if(args->verbosity>1){
-					fprintf(stderr, "Opening connection to %s Port %d\n", cfg->inputs[pos]->conn.spec.hostname, cfg->inputs[pos]->conn.spec.port);
+					if (cfg->inputs[pos]->conn.spec.socket_type == TCP_SOCKET) {
+						fprintf(stderr, "Opening connection to %s Port %d\n", cfg->inputs[pos]->conn.spec.hostname, cfg->inputs[pos]->conn.spec.port);
+					} else {
+						fprintf(stderr, "Opening unix-socket on %s\n", cfg->inputs[pos]->conn.spec.hostname);
+					}
+
 				}
 
 				if(!conn_open(&(cfg->inputs[pos]->conn))){
-					fprintf(stderr, "Failed to connect to %s Port %d\n", cfg->inputs[pos]->conn.spec.hostname, cfg->inputs[pos]->conn.spec.port);
+					if (cfg->inputs[pos]->conn.spec.socket_type == TCP_SOCKET) {
+						fprintf(stderr, "Failed to connect to %s Port %d\n", cfg->inputs[pos]->conn.spec.hostname, cfg->inputs[pos]->conn.spec.port);
+					} else {
+						fprintf(stderr, "Failed to open unix-socket on %s\n", cfg->inputs[pos]->conn.spec.hostname);
+					}
+
 					return false;
 				}
 

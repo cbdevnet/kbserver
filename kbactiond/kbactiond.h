@@ -29,9 +29,15 @@ typedef enum /*_TTYPE*/ {
 	T_EXEC
 } TOKEN_TYPE;
 
+typedef enum {
+	TCP_SOCKET,
+	UNIX_SOCKET
+} SOCKET_TYPE;
+
 typedef struct /*_CONNSPEC*/ {
 	char* hostname;
 	uint16_t port;
+	SOCKET_TYPE socket_type;
 } CONN_SPEC;
 
 typedef struct /*_CONN*/{
