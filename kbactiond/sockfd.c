@@ -348,7 +348,7 @@ bool conn_init(ARGUMENTS* args, CONFIG* cfg){
 		for(pos=0;cfg->inputs[pos];pos++){
 			if(cfg->inputs[pos]->conn.type==CONN_OUTGOING){
 				if(args->verbosity>1){
-					if (cfg->listen_socks[pos]->spec.socket_type == TCP_SOCKET) {
+					if (cfg->inputs[pos]->conn.spec.socket_type == TCP_SOCKET) {
 						fprintf(stderr, "Opening connection to %s Port %d\n", cfg->inputs[pos]->conn.spec.hostname, cfg->inputs[pos]->conn.spec.port);
 					} else {
 						fprintf(stderr, "Opening unix-socket on %s\n", cfg->inputs[pos]->conn.spec.hostname);
@@ -357,7 +357,7 @@ bool conn_init(ARGUMENTS* args, CONFIG* cfg){
 				}
 
 				if(!conn_open(&(cfg->inputs[pos]->conn))){
-					if (cfg->listen_socks[pos]->spec.socket_type == TCP_SOCKET) {
+					if (cfg->inputs[pos]->conn.spec.socket_type == TCP_SOCKET) {
 						fprintf(stderr, "Failed to connect to %s Port %d\n", cfg->inputs[pos]->conn.spec.hostname, cfg->inputs[pos]->conn.spec.port);
 					} else {
 						fprintf(stderr, "Failed to open unix-socket on %s\n", cfg->inputs[pos]->conn.spec.hostname);
