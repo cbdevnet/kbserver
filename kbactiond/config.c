@@ -1,3 +1,6 @@
+#include <string.h>
+#include <stdlib.h>
+
 bool cfg_parse_connspec(CONN_SPEC* spec, char* input){
 	unsigned off;
 
@@ -8,6 +11,19 @@ bool cfg_parse_connspec(CONN_SPEC* spec, char* input){
 		return false;
 	}
 
+	if (!strncmp(input, "unix://", 7)) {
+		// parse unix-socket
+		off -= 7;
+		spec->hostname=calloc(off + 1, sizeof(char));
+		if(!spec->hostname){
+			return false;
+		}
+		strncpy(spec->hostname, input + 7, off);
+		spec->socket_type = UNIX_SOCKET;
+		return true;
+	}
+
+	// parse tcp-socket
 	spec->hostname=calloc(off+1, sizeof(char));
 	if(!spec->hostname){
 		return false;
@@ -20,6 +36,7 @@ bool cfg_parse_connspec(CONN_SPEC* spec, char* input){
 	if(spec->port==0){
 		return false;
 	}
+	spec->socket_type = TCP_SOCKET;
 
 	return true;
 }
